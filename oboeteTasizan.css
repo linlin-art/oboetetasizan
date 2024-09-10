@@ -1,0 +1,281 @@
+body {
+    font-family: Arial, sans-serif;   /* フォントをArialに設定し、Arialが利用できない場合はsans-serifを使用 */
+    text-align: center;               /* テキストの水平位置を中央に揃える */
+    margin: 0;                        /* ページ全体のマージンを0に設定し、不要な空白を除去 */
+    padding: 0;                       /* ページ全体のパディングも0に設定し、不要な空白を除去 */
+    display: flex;                    /* フレックスボックスレイアウトを有効にする */
+    flex-direction: column;           /* フレックスボックス内の要素を縦方向に並べるように設定する */
+    justify-content: center;          /* 垂直方向にコンテンツを中央に配置 */
+    align-items: center;              /* 水平方向にコンテンツを中央に配置 */
+    height: 100vh;                    /* ビューポート全体の高さを設定 */
+    padding-top: 0;                   /* 上部の余分なパディングを削除 */
+}
+
+/* メインタイトル（h1）のスタイル設定 */
+h1 {
+    font-size: 2.5rem;                /* タイトルの文字サイズを大きく設定 */
+    margin-bottom: 10px;              /* タイトル下に10pxの余白を追加 */
+}
+
+/* ターゲットナンバーの表示エリアのスタイル */
+#info {
+    margin-bottom: 10px;              /* ターゲットナンバー表示エリアの下に10pxの余白を追加 */
+    font-size: 1.75rem;               /* ターゲットナンバーの文字サイズを大きく設定 */
+    z-index: 1;                       /* キャンバスよりも前面に表示する */
+}
+
+/* ターゲットナンバー（表示する数字）のスタイル */
+#targetNumber {
+    font-size: 2.5rem;                /* ターゲットナンバーの文字サイズをさらに大きく設定 */
+    font-weight: bold;                /* ターゲットナンバーを太字にして強調 */
+}
+
+/* ゲームボードの外側コンテナのスタイル設定 */
+#gameBoardContainer {
+    display: flex;                    /* フレックスボックスで内部要素の配置を制御 */
+    justify-content: center;          /* コンテンツを水平方向に中央配置 */
+    align-items: center;              /* コンテンツを垂直方向に中央配置 */
+    width: 100%;                      /* コンテナの幅を100%に設定 */
+    max-width: 320px;                 /* コンテナの最大幅を320pxに制限 */
+    aspect-ratio: 1;                  /* コンテナの縦横比を1:1に保つ */
+    position: relative;               /* 相対位置を設定し、内部要素の絶対位置指定をサポート */
+    z-index: 1;                       /* キャンバスより前面に表示し、タイルが隠れないようにする */
+}
+
+/* ゲームボード自体（タイルを含む）のグリッドレイアウト */
+#gameBoard {
+    display: grid;                    /* グリッドレイアウトを適用 */
+    grid-template-columns: repeat(3, 1fr); /* 3列の均等な幅を持つグリッドを作成 */
+    gap: 5px;                         /* 各タイル間に5pxの隙間を設定 */
+    width: 100%;                      /* ゲームボードの幅を100%に設定 */
+    height: 100%;                     /* ゲームボードの高さを100%に設定 */
+}
+
+/* 各タイルの基本スタイル設定 */
+.tile {
+    background-color: #e0f7fa;      /* タイルの背景色を淡い青に設定 */
+    display: flex;                    /* フレックスボックスで内部要素の配置を制御 */
+    justify-content: center;          /* タイル内のテキストを中央揃え */
+    align-items: center;              /* タイル内のテキストを垂直方向にも中央揃え */
+    font-size: 1.75rem;               /* タイルの文字サイズを大きく設定 */
+    color: black;                   /* タイル内の文字色を黒に設定 */
+    cursor: pointer;                  /* タイル上でのマウスカーソルをポインターに変更 */
+    border-radius: 8px;               /* タイルの角を8px丸めて柔らかい印象に */
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4), inset 1px 1px 2px rgba(255, 255, 255, 0.5); /* タイルに外側と内側の影を付ける */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;            /* 背景色、変形、影の変化を滑らかに */
+    box-sizing: border-box;           /* パディングとボーダーを幅と高さに含める */
+    aspect-ratio: 1;                  /* タイルを正方形に保つ */
+}
+
+/* タイルにホバーしたときのスタイル */
+.tile:hover {
+    background-color: #b2ebf2;      /* ホバー時にタイルの背景色を少し濃い青に変更 */
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5), inset -1px -1px 2px rgba(255, 255, 255, 0.5); /* ホバー時の影を少し強調 */
+}
+
+/* タイルをクリックしたときのスタイル */
+.tile:active {
+    background-color: #80deea;      /* クリック時にタイルの背景色をさらに濃い青に変更 */
+    box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.5), 2px 2px 4px rgba(255, 255, 255, 0.5); /* クリック時に内側の影を強調 */
+    transform: translateY(2px);       /* クリック時にタイルが押し込まれるアニメーション効果を追加 */
+}
+
+/* タイルが開かれたとき（マッチしたとき）のスタイル */
+.tile.flipped {
+    background-color: #f90;         /* 開かれたタイルの背景色を明るいオレンジに変更 */
+    color: black;                   /* 開かれたタイルの文字色を黒に設定 */
+}
+
+/* 同じ数字のタイルがマッチしたときのスタイル */
+.tile.same-number {
+    background-color: pink;         /* マッチしたタイルの背景色をピンクに設定 */
+    color: black;                   /* マッチしたタイルの文字色を黒に設定 */
+}
+
+/* All clear! になったときに残ったタイルのスタイル */
+.tile.all-clear {
+    background-color: yellow;       /* 残ったタイルの背景色を黄色に設定 */
+    color: black;                   /* 残ったタイルの文字色を黒に設定 */
+}
+
+/* 1～10のターゲットナンバーの小さいタイルが並ぶエリアのスタイル設定 */
+#targetNumbersContainer {
+    margin-top: 20px;                 /* ターゲットナンバーのタイルエリアの上に20pxの余白を追加 */
+    display: flex;                    /* フレックスボックスで内部要素の配置を制御 */
+    justify-content: center;          /* タイルを中央揃え */
+    gap: 5px;                         /* 各タイル間に5pxの隙間を設定 */
+    width: 100%;                      /* タイルエリアの幅を100%に設定 */
+    max-width: 320px;                 /* エリアの最大幅を320pxに制限 */
+    z-index: 1;                       /* キャンバスよりも前面に表示し、隠れないようにする */
+}
+
+/* 1～10のターゲットナンバーを表示する小さいタイルの基本スタイル */
+.target-tile {
+    width: calc((100% - 45px) / 10);  /* タイルの幅を動的に計算し、表示エリアに収まるよう設定 */
+    aspect-ratio: 1;                  /* タイルを正方形に保つ */
+    display: flex;                    /* フレックスボックスで内部要素の配置を制御 */
+    justify-content: center;          /* タイル内のテキストを中央揃え */
+    align-items: center;              /* タイル内のテキストを垂直方向にも中央揃え */
+    background-color: #e8f5e9;      /* タイルの背景色を淡い緑色に設定 */
+    border-radius: 8px;               /* タイルの角を丸め、柔らかい印象に */
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.1); /* 内側にわずかな影を付け、立体感を追加 */
+    font-weight: bold;                /* テキストを太字にして強調 */
+    font-size: 1.25rem;               /* タイルの文字サイズを1.25remに設定 */
+    transition: background-color 0.3s ease; /* 背景色の変化を滑らかにアニメーション */
+    box-sizing: border-box;           /* パディングとボーダーを幅と高さに含める */
+    padding: 2px;                     /* タイル内に2pxのパディングを追加 */
+}
+
+/* 現在のターゲットナンバーのタイルのスタイル */
+.current-target {
+    background-color: #ffd54f;      /* 現在のターゲットナンバーのタイルの背景色を黄色に設定 */
+}
+
+/* クリア済みターゲットナンバーのタイルのスタイル */
+.cleared {
+    background-color: #4caf50;      /* クリア済みターゲットナンバーのタイルの背景色を緑色に設定 */
+    color: white;                   /* クリア済みターゲットナンバーのタイルの文字色を白に設定 */
+}
+
+/* メッセージを表示するエリアのスタイル */
+#message {
+    font-size: 2rem;                  /* メッセージの文字サイズを大きく設定 */
+    color: green;                   /* メッセージの文字色を緑色に設定 */
+    font-weight: bold;                /* メッセージを太字にして強調 */
+    display: none;                    /* 初期状態でメッセージを表示しない */
+    position: fixed;                  /* メッセージの位置を固定し、スクロールしても同じ場所に表示 */
+    left: 50%;                        /* メッセージを水平方向に中央揃え */
+    transform: translateX(-50%);      /* メッセージを中央に配置するための位置調整 */
+    background-color: rgba(255, 255, 255, 0.9); /* メッセージの背景色を白に近い透明色に設定 */
+    padding: 10px 20px;               /* メッセージ内のパディングを追加 */
+    border-radius: 8px;               /* メッセージボックスの角を丸める */
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* メッセージボックスに影を付け、立体感を強調 */
+    z-index: 10;                      /* メッセージを他の要素の前面に表示 */
+    text-align: center;               /* メッセージのテキストを中央揃え */
+    max-width: 80%;                   /* メッセージの最大幅を画面の80%に制限 */
+}
+
+/* メッセージの表示位置を中央に設定 */
+#message.center {
+    top: 50%;                         /* メッセージを画面の中央に配置 */
+    transform: translate(-50%, -50%); /* メッセージを中央に配置するための位置調整 */
+}
+
+/* スタート画面やゲーム中のメッセージ画面のスタイル */
+.message {
+    line-height: 1.35;                /* 行間を少し狭める */
+    position: fixed;                  /* メッセージ画面の位置を固定し、スクロールしても同じ場所に表示 */
+    top: 50%;                         /* メッセージ画面を垂直方向に中央配置 */
+    left: 50%;                        /* メッセージ画面を水平方向に中央配置 */
+    transform: translate(-50%, -50%); /* メッセージ画面を中央に配置するための位置調整 */
+    background-color: rgba(255, 255, 255, 0.9); /* メッセージ画面の背景色を白に近い透明色に設定 */
+    border: 1px solid #ccc;         /* メッセージ画面の枠線を薄い灰色で設定 */
+    border-radius: 10px;              /* メッセージ画面の角を丸める */
+    padding: 20px;                    /* メッセージ画面内のパディングを追加 */
+    width: 80%;                       /* メッセージ画面の幅をコンテナの80%に設定 */
+    max-width: 400px;                 /* メッセージ画面の最大幅を400pxに制限 */
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* メッセージ画面に影を付け、立体感を強調 */
+    text-align: center;               /* メッセージ画面のテキストを中央揃え */
+    z-index: 10;                      /* スタート画面が他の要素の前面に表示されるように設定 */
+}
+
+/* 「スタート」ボタンのスタイル設定 */
+.start-button {
+    padding: 10px 20px;               /* ボタン内に10pxの上下パディング、20pxの左右パディングを追加 */
+    font-size: 1.5rem;                /* ボタン内の文字サイズを大きく設定 */
+    background-color: #4CAF50;      /* ボタンの背景色を緑色に設定 */
+    color: white;                   /* ボタンの文字色を白に設定し、背景色とコントラストを持たせる */
+    border: none;                     /* ボタンの枠線は無し */
+    border-radius: 5px;               /* ボタンの角を丸め、柔らかい印象に */
+    cursor: pointer;                  /* ボタン上でのマウスカーソルをポインターに変更 */
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3); /* ボタンに影を付け、立体感を強調 */
+    transition: background-color 0.3s ease; /* 背景色の変化を滑らかにアニメーション */
+    z-index: 1;                       /* スタートボタンがキャンバスよりも前面に表示されるように設定 */
+}
+
+/* 「スタート」ボタンにホバーしたときのスタイル */
+.start-button:hover {
+    background-color: #45a049;      /* ホバー時にボタンの背景色を濃い緑色に変更 */
+}
+
+/* 「スタートに戻る」ボタンの外側コンテナのスタイル設定 */
+#restartContainer {
+    margin-top: 20px;                 /*「スタートに戻る」ボタンの上に20pxの余白を追加 */
+    z-index: 1;                       /*「スタートに戻る」ボタンがキャンバスより前面に表示されるように設定 */
+}
+
+/* 「スタートに戻る」ボタンのスタイル設定 */
+.restart-button {
+    padding: 8px 16px;                /* ボタン内に8pxの上下パディング、16pxの左右パディングを追加 */
+    font-size: 1.25rem;               /* ボタン内の文字サイズをやや小さめに設定 */
+    background-color: #00A8A0;      /* ボタンの背景色を濃いティファニーブルーに設定 */
+    color: white;                   /* ボタンの文字色を白に設定し、背景色とコントラストを持たせる */
+    border: none;                     /* ボタンの枠線は無し */
+    border-radius: 5px;               /* ボタンの角を丸め、柔らかい印象に */
+    cursor: pointer;                  /* ボタン上でのマウスカーソルをポインターに変更 */
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3); /* ボタンに影を付け、立体感を強調 */
+    transition: background-color 0.3s ease; /* 背景色の変化を滑らかにアニメーション */
+}
+
+/* 「スタートに戻る」ボタンにホバーしたときのスタイル */
+.restart-button:hover {
+    background-color: #008F8A;      /* ホバー時にボタンの背景色をさらに濃いティファニーブルーに変更 */
+}
+
+/* 背景用の紙吹雪キャンバスのスタイル設定 */
+#confetti-canvas { 
+    position: fixed;                  /* キャンバスの位置を固定し、画面をスクロールしても同じ場所に表示 */
+    top: 0;                           /* キャンバスを画面の上端に配置 */
+    left: 0;                          /* キャンバスを画面の左端に配置 */
+    width: 100%;                      /* キャンバスの幅を画面全体に設定 */
+    height: 100%;                     /* キャンバスの高さを画面全体に設定 */
+    z-index: 0;                       /* キャンバスを他の要素の背後に配置 */
+    pointer-events: none;             /* キャンバスがクリックなどの操作を受け付けないように設定 */
+}
+
+/* All clear!になったときの背景色変更 */
+body.all-clear-background {
+    background-color: #DAF0E4;      /* 背景色を淡いパウダーグリーンに設定 */
+    transition: background-color 0.01s ease; /* 背景色の変更を滑らかに設定 */
+}
+
+/* 全てのターゲットをクリアし紙吹雪が降るときの背景色変更 */
+body.confetti-active {
+    background-color: #87CEFA;      /* 背景色をライトスカイブルーに設定 */
+}
+
+/* モバイル向けのスタイル調整 */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 1.75rem;           /* モバイル画面向けにタイトルの文字サイズを調整 */
+    }
+
+    #targetNumber {
+        font-size: 2rem;              /* モバイル画面向けにターゲットナンバーの文字サイズを調整 */
+    }
+
+    #gameBoardContainer {
+        max-width: 280px;             /* モバイル画面向けにゲームボードコンテナの幅を調整 */
+    }
+
+    .tile {
+        font-size: 1.5rem;            /* モバイル画面向けにタイルの文字サイズを調整 */
+        border-radius: 6px;           /* モバイル画面向けにタイルの角の丸さを調整 */
+    }
+
+    .target-tile {
+        width: calc((100% - 40px) / 10); /* モバイル画面向けにターゲットナンバータイルの幅を調整 */
+        font-size: 1.1rem;            /* モバイル画面向けにターゲットナンバータイルの文字サイズを調整 */
+        padding: 1px;                 /* モバイル画面向けにタイル内のパディングを調整 */
+    }
+
+    #message {
+        font-size: 1.5rem;            /* モバイル画面向けにメッセージの文字サイズを調整 */
+        padding: 8px 16px;            /* モバイル画面向けにメッセージ内のパディングを調整 */
+    }
+
+    .start-button, .restart-button {
+        font-size: 1.25rem;           /* モバイル画面向けにボタンの文字サイズを調整 */
+        padding: 8px 16px;            /* モバイル画面向けにボタン内のパディングを調整 */
+    }
+}
